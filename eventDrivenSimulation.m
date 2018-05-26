@@ -2,7 +2,7 @@
 %
 % Parameters:
 %   Nparticles: number of particles, default 10000;
-%   POLICY: 'FIFO' or 'FO';
+%   POLICY: 'FIFO' or 'FO' or a number in [0,1];
 %   delta_d: temporal gap for vehicles from different lanes;
 %   delta_s: temporal gap for vehicles in the same lane;
 %   lambda: a vector for the density of each lane;
@@ -19,13 +19,13 @@ lambda_total = 1;
 lambda = lambda_total*[r/(1+r),1/(1+r)];
 delta_d = 2;
 delta_s = 0;
-POLICY = 'FO';
-iter = 100;
+POLICY = 0.9;
+iter = 20;
 
-PlotMode = 2; % 0: no plot; 1: particles; 2: histogram;
+PlotMode = 1; % 0: no plot; 1: particles; 2: histogram;
 
 %% Check convergence
-checkConvergence(POLICY,lambda,delta_d,delta_s);
+% checkConvergence(POLICY,lambda,delta_d,delta_s);
 
 %% Initialize Particles
 part = zeros(Nparticles,nlane,iter);

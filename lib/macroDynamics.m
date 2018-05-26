@@ -9,7 +9,7 @@
 %   G: conflict graph
 %   delta_s: the required temporal gap between vehicles in the same lane
 %   delta_d: the required temporal gap between vehicles in different lanes
-%   POLICY: 'FIFO' or 'FO'
+%   POLICY: 'FIFO' or 'FO' or a number in [0,1]
 %
 % Outputs:
 %   newT: the new lane delay
@@ -64,7 +64,37 @@ switch POLICY
             end
         end
     otherwise
-        error('Unknown Policy');
+        if isnumeric(POLICY) && POLICY<=1 && POLICY>=0
+            S = max([0,T(s)-x+delta_s]);
+            D = -Inf; % the earlist passing time considering vehicles from other lanes
+            for k = 1:nlane
+                if k~=s
+                    if G(k,s) && T(k)-x-S+(1-1/POLICY)*delta_d>0
+                        newT(k) = Inf;
+                    else
+                        newT(k)=T(k)-x;
+                        D = max([D,newT(k)]);
+                    end
+                end
+            end
+            newT(s) = max([0,D+delta_d,S]);
+            delay = newT(s);
+            % Determine the time for delayed vehicles
+            D = 0;
+            for k = 1:nlane
+                if k~=s && newT(k) == Inf
+                    D = min([D,T(k)-x-newT(s)-delta_d]);
+                end
+            end
+            for k = 1:nlane
+                if k~=s && newT(k) == Inf
+                    newT(k) = T(k)-x-min([0,D]);
+                    delay = delay - min([0,D]);
+                end
+            end
+        else
+            error('Unknown Policy');
+        end
 end
 % add lower bounds
 for k = 1:nlane
